@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CHATBOT</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+        display: flex;
+        justify-content: center; /* Center the container horizontally */
+        align-items: center; /* Center the container vertically */
+        min-height: 100vh;
+      }
+
+      .container {
+        width: 80%;
+        max-width: 600px;
+        height: 80vh; /* Set height to 80% of viewport height */
+        padding: 20px;
+        background-color: black; /* Updated background color */
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chat-history {
+        flex: 1;
+        overflow-y: scroll;
+        padding-bottom: 10px;
+        width: 100%; /* Ensure the chat history fills the container */
+      }
+
+      .message-container {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 10px;
+      }
+
+      .message {
+        padding: 10px 15px;
+        border-radius: 10px;
+        max-width: 70%;
+      }
+
+      .user-message {
+        align-self: flex-end;
+        background-color: #f3f3f3;
+        border: 1px solid #ccc;
+        margin-bottom: 10px; /* Add margin-bottom for spacing */
+      }
+
+      .bot-message {
+        align-self: flex-start;
+        background-color: Azure;
+        margin-bottom: 10px; /* Add margin-bottom for spacing */
+        display: flex; /* Allow for flex layout */
+      }
+
+      .bot-image {
+        width: 50px; /* Adjust size as needed */
+        height: 50px; /* Adjust size as needed */
+        margin-right: 10px; /* Add margin for spacing */
+      }
+
+      .response-container {
+        flex: 1; /* Allow response container to expand */
+      }
+
+      .response {
+        background-color: lightgray; /* Adjust as needed */
+        border-radius: 10px;
+        padding: 10px;
+      }
+
+      .message p {
+        margin: 0;
+      }
+
+      .input-container {
+        display: flex;
+        align-items: center;
+        margin-top: 20px;
+      }
+
+      .input-container input[type="text"] {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+        outline: none;
+      }
+
+      .input-container button {
+        padding: 10px;
+        border: none;
+        background-color: transparent;
+        color: ghostwhite;
+        font-size: 16px;
+        cursor: pointer;
+        transition: color 0.3s ease;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+      }
+
+      .input-container button:hover {
+        color: #45a049;
+      }
+
+      .icons {
+        width: 20px;
+        margin-right: 10px;
+      }
+
+      #voiceInputButton {
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+        transition: opacity 0.3s ease;
+        margin-right: 10px;
+      }
+
+      #voiceInputButton:hover {
+        opacity: 0.8;
+      }
+
+      #errorContainer {
+        display: none;
+        margin-top: 10px;
+      }
+
+      #errorContainer h2 {
+        color: #ff0000;
+        margin-bottom: 5px;
+      }
+
+      #errorContainer p {
+        color: #ff0000;
+        margin: 0;
+      }
+
+      #submitBtn {
+        background-color: ghostwhite;
+        color: #fff;
+        transition: background-color 0.3s ease;
+      }
+
+      #submitBtn:hover {
+        background-color: lightgrey;
+      }
+
+      .portrait {
+        width: 100%;
+        max-width: 300px; /* Adjust as needed */
+        margin: auto;
+      }
+
+      @media only screen and (min-width: 768px) {
+        /* For larger screens, maintain the portrait display */
+        .portrait {
+          max-width: 400px; /* Adjust as needed */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 style="text-align: center">Chatbot</h1>
+
+      <div class="chat-history" id="chatHistory">
+        <!-- Chat messages will be dynamically inserted here -->
+      </div>
+
+      <!-- Form for uploading PDF and asking question -->
+      <form id="pdfForm" action="/" method="post" enctype="multipart/form-data">
+        <div class="input-container">
+          <input
+            type="text"
+            id="questionInput"
+            name="question"
+            placeholder="Type your question here"
+          />
+          <button id="voiceInputButton" type="button">
+            <img
+              src="data:image/jpeg;base64,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"
+              alt="Mic"
+              class="icons"
+            />
+          </button>
+          <button id="submitBtn" type="submit">Submit</button>
+        </div>
+      </form>
+
+      <!-- Display error message -->
+      <div id="errorContainer">
+        <h2>Error:</h2>
+        <p id="errorText"></p>
+      </div>
+    </div>
+
+    <!-- JavaScript for voice input and chat history -->
+    <script>
+      const voiceInputButton = document.getElementById("voiceInputButton");
+      const questionInput = document.getElementById("questionInput");
+      const chatHistory = document.getElementById("chatHistory");
+      const errorContainer = document.getElementById("errorContainer");
+
+      voiceInputButton.addEventListener("click", function () {
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = "en-US";
+        recognition.start();
+        recognition.onresult = function (event) {
+          const transcript = event.results[0][0].transcript;
+          questionInput.value = transcript;
+        };
+      });
+
+      const pdfForm = document.getElementById("pdfForm");
+
+      pdfForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        const formData = new FormData(pdfForm);
+        fetch("/", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.question && data.answer) {
+              const messageContainer = document.createElement("div");
+              messageContainer.classList.add("message-container");
+
+              const userMessage = document.createElement("div");
+              userMessage.classList.add("message", "user-message");
+              const userMessageText = document.createElement("p");
+              userMessageText.textContent = data.question;
+              userMessage.appendChild(userMessageText);
+
+              const botMessage = document.createElement("div");
+              botMessage.classList.add("message", "bot-message");
+
+              // Bot image
+              const botImage = document.createElement("img");
+              botImage.src =
+                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXePo4R7X8wcLdMOJh3qJMI3B4yfsmUMV1bg&usqp=CAU"; // Path to your bot image
+              botImage.classList.add("bot-image"); // Apply any necessary styling
+
+              const responseContainer = document.createElement("div");
+              responseContainer.classList.add("response-container");
+
+              const botMessageText = document.createElement("p");
+              botMessageText.textContent = data.answer;
+              responseContainer.appendChild(botMessageText);
+
+              botMessage.appendChild(botImage);
+              botMessage.appendChild(responseContainer);
+
+              messageContainer.appendChild(userMessage);
+              messageContainer.appendChild(botMessage);
+
+              chatHistory.appendChild(messageContainer);
+
+              errorContainer.style.display = "none";
+            } else if (data.error) {
+              errorText.textContent = data.error;
+              errorContainer.style.display = "block";
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            errorText.textContent =
+              "An error occurred while processing the request.";
+            errorContainer.style.display = "block";
+          });
+      });
+    </script>
+  </body>
+</html>
